@@ -1,15 +1,25 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
+/* istanbul ignore file */
+import React, {Suspense} from 'react';
+import {createRoot} from "react-dom/client";
+import reportWebVitals from "./reportWebVitals";
+import {routesConfig} from "./routes/routes";
+import {BrowserRouter as Router} from "react-router-dom";
 import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import {Provider} from "react-redux";
+import {store} from "./store/store";
+import {WithRouter} from "./components/WithRouter/WithRouter";
 
-const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
-);
+const container = document.getElementById('root');
+const root = createRoot(container!);
 root.render(
   <React.StrictMode>
-    <App />
+    <Provider store={store}>
+      <Router>
+        <Suspense fallback={<div>Loading.....</div>}>
+          <WithRouter routes={routesConfig} />
+        </Suspense>
+      </Router>
+    </Provider>
   </React.StrictMode>
 );
 

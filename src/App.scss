@@ -1,0 +1,50 @@
+@use "./assets/styles/breakpoints";
+
+:root {
+  --border-color-light: #b7b7b7;
+  --main-color: #b7b7b7;
+  --global-padding: 20px;
+  --global-border-radius: 10px;
+
+  --header-height: 60px;
+
+  --img-border-color: #e15021;
+
+  --sidemenu-width: 300px;
+}
+
+body {
+  background: url("assets/images/header/bg.jpg");
+  color: var(--main-color);
+}
+
+.content-wrapper {
+  margin-top: 60px;
+
+  &__item {
+    &--full-width {
+      width: 100vw;
+      position: relative;
+      left: calc(-50vw + 50%);
+    }
+  }
+
+  @include breakpoints.for-desktop {
+    max-width: 1154px;
+    margin: 60px auto;
+  }
+}
+
+.page {
+  position: relative;
+  left: 0;
+  transition: left .5s ease-in-out;
+}
+
+.side-menu-opened {
+  & .page {
+    position: fixed;
+    left: var(--sidemenu-width);
+    width: 100vw;
+  }
+}

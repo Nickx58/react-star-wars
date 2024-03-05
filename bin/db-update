@@ -1,0 +1,86 @@
+#!/usr/bin/env node
+/* eslint-disable no-loop-func */
+const axios = require('axios');
+const fs = require('fs').promises;
+const path = require('path');
+
+const apis = ['planets', 'people'];
+
+const getIdFromApiUrl = (url) => {
+  if (!url) {
+    return null;
+  }
+
+  apis.map((resource) => {
+    url = url.replace(`https://swapi.dev/api/${resource}/`, '');
+  })
+  return url.replace('/', '');
+}
+
+const fetchPeople = async () => {
+  let next = 'https://swapi.dev/api/people';
+  const people = {};
+
+  try {
+    while (next) {
+      console.log('Requesting: ', next);
+
+      const result = await axios.get(next);
+
+      console.log('Response status: ', result.status);
+
+      result.data.results.map((entity) => {
+        // convert resource URLs to primary keys
+        entity.homeworld = getIdFromApiUrl(entity.homeworld);
+        entity.id = getIdFromApiUrl(entity.url);
+        delete entity.url;
+
+        people[entity.id] = entity;
+
+        next = result.data.next;
+      })
+    }
+
+    await fs.writeFile(path.join(__dirname, '..', 'public', 'db', 'people.json'), JSON.stringify(people));
+    console.log('People DB downloaded');
+  } catch (e) {
+    console.error('fetchPeople FAILED', e);
+  }
+};
+
+const fetchPlanets = async () => {
+  let next = 'https://swapi.dev/api/planets';
+  const data = {};
+
+  try {
+    while (next) {
+      console.log('Requesting: ', next);
+
+      const result = await axios.get(next);
+
+      console.log('Response status: ', result.status);
+
+      result.data.results.map((entity) => {
+        // convert resource URLs to primary keys
+        entity.id = getIdFromApiUrl(entity.url);
+        entity.residents = entity.residents.map(item => getIdFromApiUrl(item));
+        delete entity.url;
+
+        data[entity.id] = entity;
+
+        next = result.data.next;
+      })
+    }
+
+    await fs.writeFile(path.join(__dirname, '..', 'public', 'db', 'planets.json'), JSON.stringify(data));
+    console.log('Planets DB downloaded');
+  } catch (e) {
+    console.error('fetchPlanets FAILED', e);
+  }
+};
+
+
+(async () => {
+  fetchPeople();
+  fetchPlanets();
+})();
